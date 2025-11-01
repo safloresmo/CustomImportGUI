@@ -17,6 +17,7 @@
 - Elige tu propio nombre de librería
 - Define tus propias variables de entorno
 - Organiza los componentes a tu manera
+- Sistema de perfiles predefinidos (MictlanTeam, CustomLibrary)
 
 🌍 **Multiidioma**
 - Interfaz en español por defecto
@@ -35,6 +36,11 @@
 - Arrastra y suelta archivos ZIP
 - Librería global o por proyecto
 
+📝 **Metadatos Automáticos**
+- Todos los componentes incluyen metadatos personalizados
+- Información de autor, repositorio y fecha de importación
+- Trazabilidad completa de componentes importados
+
 ### Requisitos
 
 - KiCad 8.0 o superior
@@ -46,7 +52,7 @@
 
 1. **Descargar el plugin:**
    - Ve a [Releases](https://github.com/safloresmo/CustomImportGUI/releases)
-   - Descarga el archivo `CustomImportGUI-v1.0.0.zip`
+   - Descarga el archivo `CustomImportGUI-v1.1.0.zip`
 
 2. **Instalar en KiCad:**
    - Abre KiCad
@@ -107,6 +113,23 @@ Al ejecutar el plugin por primera vez:
 1. Copia el ID del componente (ej: C2040)
 2. Pégalo en el campo "Manual EasyEDA/LCSC import"
 3. Presiona el botón de importación
+
+### Metadatos de Componentes
+
+Todos los componentes importados incluyen automáticamente los siguientes metadatos personalizados (ocultos en el esquemático, visibles en las propiedades del símbolo):
+
+- **ImportedBy:** CustomImportGUI v1.1.0
+- **Author:** Samuel Flores
+- **Repository:** github.com/safloresmo/CustomImportGUI
+- **Website:** www.mictlanteam.com
+- **ImportDate:** Fecha de importación
+- **OriginalSource:** Fuente original del componente (EasyEDA, Snapeda, etc.)
+
+Estos metadatos te permiten:
+- Rastrear el origen de cada componente
+- Identificar cuándo fue importado
+- Mantener la trazabilidad en tus proyectos
+- Contactar al autor para soporte
 
 ### Configuración de Variables de Entorno
 
@@ -191,6 +214,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - Choose your own library name
 - Define your own environment variables
 - Organize components your way
+- Predefined profile system (MictlanTeam, CustomLibrary)
 
 🌍 **Multi-language**
 - Spanish interface by default
@@ -209,6 +233,11 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - Drag and drop ZIP files
 - Global or project-specific library
 
+📝 **Automatic Metadata**
+- All components include custom metadata
+- Author, repository, and import date information
+- Complete traceability of imported components
+
 ### Requirements
 
 - KiCad 8.0 or higher
@@ -220,7 +249,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 1. **Download the plugin:**
    - Go to [Releases](https://github.com/safloresmo/CustomImportGUI/releases)
-   - Download the file `CustomImportGUI-v1.0.0.zip`
+   - Download the file `CustomImportGUI-v1.1.0.zip`
 
 2. **Install in KiCad:**
    - Open KiCad
@@ -281,6 +310,23 @@ When running the plugin for the first time:
 1. Copy the component ID (e.g., C2040)
 2. Paste it in the "Manual EasyEDA/LCSC import" field
 3. Press the import button
+
+### Component Metadata
+
+All imported components automatically include the following custom metadata (hidden in schematics, visible in symbol properties):
+
+- **ImportedBy:** CustomImportGUI v1.0.0
+- **Author:** Samuel Flores
+- **Repository:** github.com/safloresmo/CustomImportGUI
+- **Website:** www.mictlanteam.com
+- **ImportDate:** Import date
+- **OriginalSource:** Original component source (EasyEDA, Snapeda, etc.)
+
+These metadata fields allow you to:
+- Track the origin of each component
+- Identify when it was imported
+- Maintain traceability in your projects
+- Contact the author for support
 
 ### Environment Variable Configuration
 

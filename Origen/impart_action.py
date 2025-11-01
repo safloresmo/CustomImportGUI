@@ -201,6 +201,10 @@ class ImpartBackend:
             self.importer = LibImporter()
             # Create a wrapper function that matches the expected signature
             self.importer.print = lambda txt: self.print_to_buffer(txt)
+            # Set library configuration from config
+            self.importer.set_library_name(self.config.get_library_name())
+            self.importer.KICAD_3RD_PARTY_LINK = self.config.get_library_variable()
+            self.importer.set_DEST_PATH(self.config.get_DEST_PATH())
 
             logging.info("Successfully initialized all backend components")
             logging.info(f"KiCad settings path: {self.kicad_settings.SettingPath}")
@@ -484,6 +488,8 @@ class ImpartFrontend(impartGUI):
 
         if current_profile in available_profiles:
             self.m_choice_profile.SetStringSelection(current_profile)
+        elif "CustomLibrary" in available_profiles:
+            self.m_choice_profile.SetStringSelection("CustomLibrary")
         else:
             self.m_choice_profile.SetSelection(0)
 
@@ -576,6 +582,7 @@ class ImpartFrontend(impartGUI):
             # Actualizar backend
             self.backend.importer.set_library_name(self.backend.config.get_library_name())
             self.backend.importer.KICAD_3RD_PARTY_LINK = self.backend.config.get_library_variable()
+            self.backend.importer.set_DEST_PATH(self.backend.config.get_DEST_PATH())
 
             self.backend.print_to_buffer(f"\n✓ Profile '{selected_profile}' loaded successfully")
             self.backend.print_to_buffer(f"  • Library: {self.backend.config.get_library_name()}")
@@ -878,7 +885,7 @@ class ImpartFrontend(impartGUI):
             dest_path = self.backend.config.get_DEST_PATH()
             if dest_path:
                 self.backend.importer.set_DEST_PATH(Path(dest_path))
-            kicad_link = "${KICAD_3RD_PARTY}"
+            kicad_link = self.backend.config.get_library_variable()
 
         self.backend.importer.KICAD_3RD_PARTY_LINK = kicad_link
 
@@ -1023,9 +1030,9 @@ class ImpartFrontend(impartGUI):
 
         config = ImportConfig(
             base_folder=Path(base_folder),
-            lib_name="EasyEDA",
+            lib_name=self.backend.config.get_library_name(),
             overwrite=self.m_overwrite.IsChecked(),
-            lib_var=path_variable,
+            lib_var=self.backend.config.get_library_variable() if not self.backend.local_lib else path_variable,
         )
 
         component_id = self.m_textCtrl2.GetValue().strip()

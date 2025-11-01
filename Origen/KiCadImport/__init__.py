@@ -106,6 +106,7 @@ class LibImporter:
     def __init__(self):
         self.KICAD_3RD_PARTY_LINK: str = "${KICAD_3RD_PARTY}"
         self.DEST_PATH = Path.home() / "KiCad"
+        self.library_name = "CustomLibrary"
         self.dcm_skipped = False
         self.lib_skipped = False
         self.footprint_skipped = False
@@ -115,6 +116,9 @@ class LibImporter:
 
     def set_DEST_PATH(self, DEST_PATH_=Path.home() / "KiCad"):
         self.DEST_PATH = Path(DEST_PATH_)
+
+    def set_library_name(self, library_name):
+        self.library_name = library_name
 
     def cleanName(self, name):
         invalid = '<>:"/\\|?* '
@@ -433,7 +437,7 @@ class LibImporter:
             return False
 
         model_path = (
-            f"{self.KICAD_3RD_PARTY_LINK}/{remote_type.name}.3dshapes/{model_name}"
+            f"{self.KICAD_3RD_PARTY_LINK}/{self.library_name}.3dshapes/{model_name}"
         )
 
         try:
@@ -497,6 +501,62 @@ class LibImporter:
 
         return symbol_lib
 
+    def _add_custom_metadata(
+        self, symbol_lib: SymbolLib, original_source: str
+    ) -> SymbolLib:
+        """
+        Add custom metadata properties to all symbols in the library.
+
+        Args:
+            symbol_lib: SymbolLib object to modify
+            original_source: Original source of the component (e.g., "Snapeda", "Samacsys")
+
+        Returns:
+            Updated SymbolLib with metadata properties
+        """
+        from datetime import datetime
+
+        if not symbol_lib or not symbol_lib.symbols:
+            return symbol_lib
+
+        # Metadata to add to each symbol
+        metadata_fields = {
+            "ImportedBy": "CustomImportGUI v1.1.0",
+            "Author": "Samuel Flores",
+            "Repository": "github.com/safloresmo/CustomImportGUI",
+            "Website": "www.mictlanteam.com",
+            "ImportDate": datetime.now().strftime("%Y-%m-%d"),
+            "OriginalSource": original_source,
+        }
+
+        for symbol in symbol_lib.symbols:
+            # Get existing property keys to avoid duplicates
+            existing_keys = {prop.key for prop in symbol.properties}
+
+            # Add each metadata field if it doesn't already exist
+            for key, value in metadata_fields.items():
+                if key not in existing_keys:
+                    new_prop = Property(
+                        key=key,
+                        value=value,
+                        id=0,  # Will be assigned by kiutils
+                        position=Position(0, 0),
+                        effects=Effects(
+                            font=Font(
+                                face="default",
+                                height=1.27,
+                                width=1.27,
+                                bold=False,
+                                italic=False,
+                            ),
+                            hide=True,  # Hidden by default - won't show in schematic
+                        ),
+                    )
+                    symbol.properties.append(new_prop)
+                    logger.debug(f"Added custom property '{key}' = '{value}' to symbol")
+
+        return symbol_lib
+
     def save_to_library(
         self,
         symbol_lib: Optional[SymbolLib],
@@ -518,7 +578,7 @@ class LibImporter:
         try:
             # 1. Save symbol library with atomic write
             if symbol_lib:
-                lib_file_path = self.DEST_PATH / f"{remote_type.name}.kicad_sym"
+                lib_file_path = self.DEST_PATH / f"{self.library_name}.kicad_sym"
 
                 # Create backup if file exists
                 backup_path = None
@@ -614,7 +674,7 @@ class LibImporter:
 
             # 3. Save 3D model
             if model_path:
-                model_dir = self.DEST_PATH / f"{remote_type.name}.3dshapes"
+                model_dir = self.DEST_PATH / f"{self.library_name}.3dshapes"
                 if not model_dir.exists():
                     model_dir.mkdir(parents=True, exist_ok=True)
                     modified_objects.append(model_dir, Modification.MKDIR)
@@ -678,7 +738,7 @@ class LibImporter:
                         )
 
             # Clean up any remaining temporary files
-            for pattern in [f"{remote_type.name}.kicad_sym.tmp", "*.tmp"]:
+            for pattern in [f"{self.library_name}.kicad_sym.tmp", "*.tmp"]:
                 for temp_file in self.DEST_PATH.glob(pattern):
                     if temp_file.exists():
                         temp_file.unlink(missing_ok=True)
@@ -729,7 +789,7 @@ class LibImporter:
                 # Handle footprint - extract directly to destination
                 footprint_file_path = None
                 if files["footprint"]:
-                    footprint_dir = self.DEST_PATH / f"{remote_type.name}.pretty"
+                    footprint_dir = self.DEST_PATH / f"{self.library_name}.pretty"
                     if not footprint_dir.exists():
                         footprint_dir.mkdir(parents=True, exist_ok=True)
                         modified_objects.append(footprint_dir, Modification.MKDIR)
@@ -790,6 +850,10 @@ class LibImporter:
                     symbol_lib = self.update_symbol_properties(
                         symbol_lib, self.footprint_name, remote_type
                     )
+
+                # Add custom metadata properties to symbols
+                if symbol_lib:
+                    symbol_lib = self._add_custom_metadata(symbol_lib, remote_type.name)
 
                 # Save everything to the library
                 if symbol_lib or footprint_file_path or model_path:
