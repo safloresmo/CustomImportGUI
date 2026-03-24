@@ -219,7 +219,7 @@ class ImpartBackend:
         self.overwrite_import = False
         self.import_old_format = False
         self.local_lib = False
-        self.auto_lib = False
+        self.auto_lib = True
         self.print_buffer = ""
 
         """Check initial configuration and version."""
@@ -314,7 +314,8 @@ def check_library_import(backend: ImpartBackend, add_if_possible: bool = True) -
     else:
         kicad_settings = backend.kicad_settings
         dest_path = backend.config.get_DEST_PATH()
-        msg = kicad_settings.check_GlobalVar(dest_path, add_if_possible)
+        lib_var = backend.config.get_library_variable()
+        msg = kicad_settings.check_GlobalVar(dest_path, add_if_possible, var_name=lib_var)
 
     for lib_name in ImpartBackend.SUPPORTED_LIBRARIES:
         msg += _check_single_library(
@@ -931,7 +932,7 @@ class ImpartFrontend(impartGUI):
         full_msg = (
             f"{msg}\n\n"
             "More information can be found in the README for the integration into KiCad.\n"
-            "github.com/Steffen-W/Import-LIB-KiCad-Plugin\n"
+            "github.com/safloresmo/CustomImportGUI\n"
             "Some configurations require a KiCad restart to be detected correctly."
         )
 

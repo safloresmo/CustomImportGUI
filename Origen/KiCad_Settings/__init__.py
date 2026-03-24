@@ -389,39 +389,42 @@ class KiCad_Settings:
 
         return msg
 
-    def check_GlobalVar(self, LocalLibFolder, add_if_possible=True):
+    def check_GlobalVar(self, LocalLibFolder, add_if_possible=True, var_name=None):
         msg = ""
+        # Use the profile's variable name, stripping ${ } if present
+        if var_name:
+            env_var = var_name.strip("${}")
+        else:
+            env_var = self.path_prefix.strip("${}")
+
         GlobalVars = self.get_kicad_GlobalVars()
 
         def setup_kicad_common():
             kicad_common = self.get_kicad_common()
-            # Ensure the nested structure exists
             if "environment" not in kicad_common:
                 kicad_common["environment"] = {}
             if "vars" not in kicad_common["environment"]:
                 kicad_common["environment"]["vars"] = {}
 
-            kicad_common["environment"]["vars"]["KICAD_3RD_PARTY"] = LocalLibFolder
+            kicad_common["environment"]["vars"][env_var] = LocalLibFolder
             self.set_kicad_common(kicad_common)
 
-        if GlobalVars and "KICAD_3RD_PARTY" in GlobalVars:
-            if not GlobalVars["KICAD_3RD_PARTY"] == LocalLibFolder:
-                msg += "\nKICAD_3RD_PARTY is defined as '"
-                msg += GlobalVars["KICAD_3RD_PARTY"]
-                msg += "' and not '" + LocalLibFolder + "'."
+        if GlobalVars and env_var in GlobalVars:
+            if not GlobalVars[env_var] == LocalLibFolder:
                 if add_if_possible:
                     setup_kicad_common()
-                    msg += "\nThe entry was changed automatically."
-                    msg += "\n##### A restart of KiCad is necessary. #####"
+                    self.logger.info(f"Auto-configured {env_var} = {LocalLibFolder}")
                 else:
+                    msg += f"\n{env_var} is defined as '"
+                    msg += GlobalVars[env_var]
+                    msg += "' and not '" + LocalLibFolder + "'."
                     msg += "\nChange the entry or select the automatic option."
         else:
-            msg += "\nKICAD_3RD_PARTY" + " is not defined in Environment Variables."
             if add_if_possible:
                 setup_kicad_common()
-                msg += "\nThe entry has been added successfully."
-                msg += "\n##### A restart of KiCad is necessary. #####"
+                self.logger.info(f"Auto-configured {env_var} = {LocalLibFolder}")
             else:
+                msg += f"\n{env_var} is not defined in Environment Variables."
                 msg += "\nYou must add them manually or select the automatic option."
 
         return msg
