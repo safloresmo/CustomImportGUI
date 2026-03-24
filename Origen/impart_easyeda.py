@@ -183,7 +183,7 @@ class EasyEDAImporter:
 
         # Metadata fields to add
         metadata = [
-            ('ImportedBy', 'CustomImportGUI v1.1.0'),
+            ('ImportedBy', 'CustomImportGUI v1.2.0'),
             ('Author', 'Samuel Flores'),
             ('Repository', 'github.com/safloresmo/CustomImportGUI'),
             ('Website', 'www.mictlanteam.com'),

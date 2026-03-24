@@ -116,6 +116,21 @@ def show_error_dialog(title, message):
         print(f"Error: {title} - {message}")
 
 
+def _check_swig_deprecation():
+    """Warn about SWIG deprecation for KiCad 11+"""
+    try:
+        version_str = pcbnew.Version().split("-")[0]
+        major = int(version_str.split(".")[0])
+        if major >= 10:
+            logging.getLogger("impart_plugin").warning(
+                "SWIG bindings are deprecated since KiCad 9 and will be removed in KiCad 11. "
+                "This plugin supports the IPC API as an alternative. "
+                "The fallback pcbnew mode will stop working in KiCad 11."
+            )
+    except Exception:
+        pass
+
+
 class ActionCustomImportPlugin(pcbnew.ActionPlugin):
     """KiCad Action Plugin for library import using git submodules."""
 
@@ -134,6 +149,9 @@ class ActionCustomImportPlugin(pcbnew.ActionPlugin):
         try:
             setup_logging()
             logger.info("Plugin started")
+
+            # Check SWIG deprecation status
+            _check_swig_deprecation()
 
             # Set up paths for git submodules (no venv needed)
             if not setup_submodule_paths():

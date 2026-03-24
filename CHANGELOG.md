@@ -1,5 +1,42 @@
 # Changelog - Custom Import GUI
 
+## Version 1.2.0 - Compatibilidad con KiCad 10
+
+### Compatibilidad
+
+- **KiCad 10:** Soporte completo para KiCad 10.0 (lanzado el 20 de marzo de 2026)
+- **PCM:** Actualizado `kicad_version_max` de `9.99` a `10.99` para permitir instalación via PCM en KiCad 10
+- **Detección de rutas:** Ampliado el rango de búsqueda de directorios de configuración hasta KiCad 14.x
+- **SWIG deprecation:** Añadida advertencia cuando se ejecuta en modo fallback (pcbnew/SWIG) en KiCad 10+, ya que los bindings SWIG se eliminarán en KiCad 11
+- **API IPC:** El plugin ya soporta la API IPC como modo de conexión principal, preparado para la transición
+
+### Archivos Modificados
+
+1. **`metadata.json`**
+   - `kicad_version_max`: `9.99` → `10.99`
+   - `version`: `1.1.0` → `1.2.0`
+
+2. **`KiCadSettingsPaths/__init__.py`**
+   - Rango de versiones: `range(5, 12)` → `range(5, 15)`
+
+3. **`__init__.py`**
+   - Añadida función `_check_swig_deprecation()` que advierte en el log cuando se usa el modo fallback pcbnew en KiCad 10+
+
+4. **`README.md`**
+   - Requisitos actualizados: KiCad 8.0 - 10.x
+   - Nota sobre deprecación de SWIG y soporte de API IPC
+   - Rutas de instalación manual genéricas (no hardcoded a `8.0`)
+
+### Migración desde v1.1.0
+
+No se requiere migración. Actualiza el plugin y funcionará en KiCad 10 sin cambios adicionales.
+
+### Nota sobre el Futuro (KiCad 11)
+
+Los bindings SWIG (modo fallback pcbnew) serán eliminados en KiCad 11. El plugin ya soporta la API IPC como alternativa. El modo IPC (via `plugin.json`) es el método de ejecución recomendado desde KiCad 9.
+
+---
+
 ## Version 1.1.0 - Metadatos Personalizados y Correcciones
 
 ### Nuevas Características
@@ -193,7 +230,7 @@ El sistema de traducción está listo pero no integrado aún en la GUI. Para int
    ```
 
 2. **Copiar a KiCad:**
-   - Windows: `%APPDATA%\kicad\8.0\3rdparty\plugins\CustomImportGUI`
+   - Windows: `%APPDATA%\kicad\<version>\3rdparty\plugins\CustomImportGUI`
 
 3. **Primera ejecución:**
    - Configura nombre de librería (ej: "MiProyecto")
@@ -207,7 +244,7 @@ El sistema de traducción está listo pero no integrado aún en la GUI. Para int
 
 ### Compatibilidad
 
-- ✅ KiCad 8.0+
+- ✅ KiCad 8.0 - 10.x
 - ✅ Python 3.x (incluido en KiCad)
 - ✅ Windows, Linux, macOS
 - ✅ Coexiste con plugin original

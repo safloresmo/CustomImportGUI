@@ -53,7 +53,7 @@ class KiCadSettingsPaths:
                 # Version-specific subdirectories
                 roaming_kicad = home / "AppData" / "Roaming" / "kicad"
                 if roaming_kicad.exists():
-                    for major in range(5, 12):
+                    for major in range(5, 15):
                         for minor in range(0, 10):
                             version_path = roaming_kicad / f"{major}.{minor}"
                             if version_path.exists():
