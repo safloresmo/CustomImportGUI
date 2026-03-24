@@ -27,7 +27,7 @@ def quick_instance_check(port: int = 59999) -> bool:
         client_socket.connect(("127.0.0.1", port))
         client_socket.close()
         return True
-    except:
+    except (ConnectionRefusedError, socket.error, OSError):
         return False
 
 
@@ -1026,7 +1026,6 @@ class ImpartFrontend(impartGUI):
             path_variable = "${KIPRJMOD}"
             base_folder = project_path
         else:
-            path_variable = "${KICAD_3RD_PARTY}"
             base_folder = self.backend.config.get_DEST_PATH()
 
         config = ImportConfig(
