@@ -43,8 +43,10 @@
 
 ### Requisitos
 
-- KiCad 8.0 o superior
+- KiCad 8.0 - 10.x (compatible con KiCad 10)
 - Python 3.x (incluido con KiCad)
+
+> **Nota:** Los bindings SWIG de KiCad fueron deprecados en KiCad 9 y se eliminarán en KiCad 11. Este plugin ya soporta la API IPC como alternativa.
 
 ### Instalación
 
@@ -52,7 +54,7 @@
 
 1. **Descargar el plugin:**
    - Ve a [Releases](https://github.com/safloresmo/CustomImportGUI/releases)
-   - Descarga el archivo `CustomImportGUI-v1.1.0.zip`
+   - Descarga el archivo `CustomImportGUI-v1.2.0.zip`
 
 2. **Instalar en KiCad:**
    - Abre KiCad
@@ -76,9 +78,9 @@
 
 3. **Instalar en KiCad:**
    - Copia la carpeta completa a tu directorio de plugins de KiCad
-   - En Windows: `%APPDATA%\kicad\8.0\3rdparty\plugins\CustomImportGUI\`
-   - En Linux: `~/.local/share/kicad/8.0/3rdparty/plugins/CustomImportGUI/`
-   - En macOS: `~/Library/Application Support/kicad/8.0/3rdparty/plugins/CustomImportGUI/`
+   - En Windows: `%APPDATA%\kicad\<version>\3rdparty\plugins\CustomImportGUI\` (ej: `8.0`, `9.0`, `10.0`)
+   - En Linux: `~/.local/share/kicad/<version>/3rdparty/plugins/CustomImportGUI/`
+   - En macOS: `~/Library/Application Support/kicad/<version>/3rdparty/plugins/CustomImportGUI/`
 
 ### Configuración Inicial
 
@@ -118,7 +120,7 @@ Al ejecutar el plugin por primera vez:
 
 Todos los componentes importados incluyen automáticamente los siguientes metadatos personalizados (ocultos en el esquemático, visibles en las propiedades del símbolo):
 
-- **ImportedBy:** CustomImportGUI v1.1.0
+- **ImportedBy:** CustomImportGUI v1.2.0
 - **Author:** Samuel Flores
 - **Repository:** github.com/safloresmo/CustomImportGUI
 - **Website:** www.mictlanteam.com
@@ -240,8 +242,10 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ### Requirements
 
-- KiCad 8.0 or higher
+- KiCad 8.0 - 10.x (compatible with KiCad 10)
 - Python 3.x (included with KiCad)
+
+> **Note:** KiCad's SWIG bindings were deprecated in KiCad 9 and will be removed in KiCad 11. This plugin already supports the IPC API as an alternative.
 
 ### Installation
 
@@ -249,7 +253,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 1. **Download the plugin:**
    - Go to [Releases](https://github.com/safloresmo/CustomImportGUI/releases)
-   - Download the file `CustomImportGUI-v1.1.0.zip`
+   - Download the file `CustomImportGUI-v1.2.0.zip`
 
 2. **Install in KiCad:**
    - Open KiCad
@@ -273,9 +277,9 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 3. **Install in KiCad:**
    - Copy the complete folder to your KiCad plugins directory
-   - Windows: `%APPDATA%\kicad\8.0\3rdparty\plugins\CustomImportGUI\`
-   - Linux: `~/.local/share/kicad/8.0/3rdparty/plugins/CustomImportGUI/`
-   - macOS: `~/Library/Application Support/kicad/8.0/3rdparty/plugins/CustomImportGUI/`
+   - Windows: `%APPDATA%\kicad\<version>\3rdparty\plugins\CustomImportGUI\` (e.g., `8.0`, `9.0`, `10.0`)
+   - Linux: `~/.local/share/kicad/<version>/3rdparty/plugins/CustomImportGUI/`
+   - macOS: `~/Library/Application Support/kicad/<version>/3rdparty/plugins/CustomImportGUI/`
 
 ### Initial Setup
 
@@ -315,7 +319,7 @@ When running the plugin for the first time:
 
 All imported components automatically include the following custom metadata (hidden in schematics, visible in symbol properties):
 
-- **ImportedBy:** CustomImportGUI v1.0.0
+- **ImportedBy:** CustomImportGUI v1.2.0
 - **Author:** Samuel Flores
 - **Repository:** github.com/safloresmo/CustomImportGUI
 - **Website:** www.mictlanteam.com
