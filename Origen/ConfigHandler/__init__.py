@@ -14,6 +14,7 @@ class ConfigHandler:
             "DEST_PATH": str(Path.home() / "KiCad"),
             "library_name": "CustomLibrary",
             "library_variable": "${CUSTOM_LIBRARY}",
+            "organize_by_category": "false",
         }
 
         # Predefined profiles (paths relative to user's home)
@@ -54,6 +55,9 @@ class ConfigHandler:
 
         if not self.config_is_set:
             self.save_config()
+
+        # Auto-create directories on first run
+        self._ensure_directories_exist()
 
     def _create_default_config(self):
         self.config = configparser.ConfigParser()
@@ -201,3 +205,23 @@ class ConfigHandler:
         """Set the currently active profile name."""
         self.config["config"]["current_profile"] = profile_name
         self.save_config()
+
+    def get_organize_by_category(self):
+        """Get whether to organize imports by category."""
+        return self.config["config"].get("organize_by_category", "false").lower() == "true"
+
+    def set_organize_by_category(self, enabled):
+        """Set whether to organize imports by category."""
+        self.config["config"]["organize_by_category"] = str(enabled).lower()
+        self.save_config()
+
+    def _ensure_directories_exist(self):
+        """Auto-create source and destination directories if they don't exist."""
+        for path_str in [self.get_SRC_PATH(), self.get_DEST_PATH()]:
+            try:
+                path = Path(path_str)
+                if not path.exists():
+                    path.mkdir(parents=True, exist_ok=True)
+                    logging.info(f"Auto-created directory: {path}")
+            except Exception as e:
+                logging.warning(f"Could not create directory {path_str}: {e}")

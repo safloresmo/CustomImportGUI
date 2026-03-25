@@ -127,7 +127,7 @@ class SingleInstanceManager:
                 if client_socket:
                     try:
                         client_socket.close()
-                    except:
+                    except (OSError, Exception):
                         pass
 
     def _handle_command(self, message: dict) -> None:

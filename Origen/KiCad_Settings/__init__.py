@@ -4,6 +4,12 @@ import logging
 from typing import List, Dict, Tuple, Any, Optional
 from pathlib import Path
 
+try:
+    from i18n import _ as tr
+except ImportError:
+    def tr(key, **kwargs):
+        return key
+
 current_dir = Path(__file__).resolve().parent
 kiutils_src = current_dir.parent / "kiutils" / "src"
 if str(kiutils_src) not in __import__("sys").path:
@@ -317,41 +323,31 @@ class KiCad_Settings:
             temp_path = self.path_prefix + "/" + SearchLib + ".pretty"
             if SearchLib in FootprintLibs:
                 if not FootprintLibs[SearchLib]["uri"] == temp_path:
-                    msg += "\n" + SearchLib
-                    msg += " in the Footprint Libraries is not imported correctly."
-                    msg += "\nYou have to import the library " + SearchLib
-                    msg += "' with the path '" + temp_path + "' in Footprint Libraries."
+                    msg += f"\n{SearchLib} {tr('lib.fp_not_correct')}"
+                    msg += f"\n{tr('lib.must_import', name=SearchLib, path=temp_path)}"
                     if add_if_possible:
-                        msg += (
-                            "\nThe entry must either be corrected manually or deleted."
-                        )
-                        # self.set_lib_table_entry(SearchLib) # TODO
+                        msg += f"\n{tr('lib.must_correct_manually')}"
             else:
-                msg += "\n" + SearchLib + " is not in the Footprint Libraries."
+                msg += f"\n{SearchLib} {tr('lib.fp_not_found')}"
                 if add_if_possible:
                     try:
                         self.set_lib_table_entry(SearchLib)
-                        msg += "\nThe library " + SearchLib
-                        msg += " has been successfully added."
-                        msg += "\n##### A restart of KiCad is necessary. #####"
+                        msg += f"\n{tr('lib.added_success', name=SearchLib)}"
+                        msg += f"\n{tr('lib.restart_required')}"
                     except Exception:
-                        msg += "\nFailed to add library automatically."
+                        msg += f"\n{tr('lib.add_failed')}"
                 else:
-                    msg += "\nYou have to import the library " + SearchLib
-                    msg += "' with the path '" + temp_path
-                    msg += (
-                        "' in the Footprint Libraries or select the automatic option."
-                    )
+                    msg += f"\n{tr('lib.must_import', name=SearchLib, path=temp_path)}"
         except Exception:
-            msg += f"\nError checking footprint library {SearchLib}."
+            msg += f"\n{tr('lib.check_error', name=SearchLib)}"
 
         return msg
 
     def check_symbollib(self, SearchLib: str, add_if_possible: bool = True):
         msg = ""
         try:
+            # Use full name without extension as the library name
             SearchLib_name = SearchLib.split(".")[0]
-            SearchLib_name_short = SearchLib_name.split("_")[0]
 
             SymbolTable = self.get_sym_table()
             SymbolLibs = {lib["name"]: lib for lib in SymbolTable}
@@ -360,32 +356,21 @@ class KiCad_Settings:
             temp_path = self.path_prefix + "/" + SearchLib
 
             if temp_path not in SymbolLibsUri:
-                msg += (
-                    "\n'" + temp_path + "' is not imported into the Symbol Libraries."
-                )
+                msg += f"\n'{temp_path}' {tr('lib.sym_not_imported')}"
                 if add_if_possible:
                     try:
-                        if SearchLib_name_short not in SymbolLibs:
-                            self.set_sym_table(SearchLib_name_short, temp_path)
-                            msg += "\nThe library " + SearchLib
-                            msg += " has been successfully added."
-                            msg += "\n##### A restart of KiCad is necessary. #####"
-                        elif SearchLib_name not in SymbolLibs:
+                        if SearchLib_name not in SymbolLibs:
                             self.set_sym_table(SearchLib_name, temp_path)
-                            msg += "\nThe library " + SearchLib
-                            msg += " has been successfully added."
-                            msg += "\n##### A restart of KiCad is necessary. #####"
+                            msg += f"\n{tr('lib.added_success', name=SearchLib)}"
+                            msg += f"\n{tr('lib.restart_required')}"
                         else:
-                            msg += "\nThe entry must either be corrected manually or deleted."
-                            # self.set_sym_table(SearchLib_name, temp_path) # TODO
+                            msg += f"\n{tr('lib.must_correct_manually')}"
                     except Exception:
-                        msg += "\nFailed to add symbol library automatically."
+                        msg += f"\n{tr('lib.add_failed')}"
                 else:
-                    msg += (
-                        "\nYou must add them manually or select the automatic option."
-                    )
+                    msg += f"\n{tr('lib.must_add_manually')}"
         except Exception:
-            msg += f"\nError checking symbol library {SearchLib}."
+            msg += f"\n{tr('lib.check_error', name=SearchLib)}"
 
         return msg
 

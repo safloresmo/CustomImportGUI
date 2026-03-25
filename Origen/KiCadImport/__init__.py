@@ -14,6 +14,17 @@ from enum import Enum
 from typing import Tuple, Union, List, Dict, Any, Optional
 from pathlib import Path
 
+try:
+    from version import PLUGIN_VERSION_STRING
+except ImportError:
+    PLUGIN_VERSION_STRING = "CustomImportGUI"
+
+try:
+    from i18n import _ as tr
+except ImportError:
+    def tr(key, **kwargs):
+        return key
+
 logger = logging.getLogger(__name__)
 
 # Setup kiutils path using sys.path manipulation like KiCad_Settings
@@ -107,12 +118,16 @@ class LibImporter:
         self.KICAD_3RD_PARTY_LINK: str = "${KICAD_3RD_PARTY}"
         self.DEST_PATH = Path.home() / "KiCad"
         self.library_name = "CustomLibrary"
+        self.sub_library_name = ""  # When set, overrides library_name for .kicad_sym file
         self.dcm_skipped = False
         self.lib_skipped = False
         self.footprint_skipped = False
         self.model_skipped = False
         self.footprint_name = None
         self.footprint_parser = FootprintModelParser()
+        # Callbacks
+        self.on_import_success = None  # callback(component_name, source, zip_file)
+        self.on_progress = None  # callback(step, total, message)
 
     def set_DEST_PATH(self, DEST_PATH_=Path.home() / "KiCad"):
         self.DEST_PATH = Path(DEST_PATH_)
@@ -237,8 +252,9 @@ class LibImporter:
             files["model"] = model_path
             return REMOTE_TYPES.Partial, files
 
-        logger.error("Unable to identify library format - no usable files found")
-        raise ValueError("Unable to identify library format. Missing essential files.")
+        file_list = [f.filename for f in zf.filelist[:10]]
+        logger.error(f"Unable to identify library format. Files in ZIP: {file_list}")
+        raise ValueError(tr("import.zip_not_compatible"))
 
     def extract_file_to_temp(
         self, file_path: Optional[Union[Path, zipfile.Path]]
@@ -521,7 +537,7 @@ class LibImporter:
 
         # Metadata to add to each symbol
         metadata_fields = {
-            "ImportedBy": "CustomImportGUI v1.2.0",
+            "ImportedBy": PLUGIN_VERSION_STRING,
             "Author": "Samuel Flores",
             "Repository": "github.com/safloresmo/CustomImportGUI",
             "Website": "www.mictlanteam.com",
@@ -578,7 +594,8 @@ class LibImporter:
         try:
             # 1. Save symbol library with atomic write
             if symbol_lib:
-                lib_file_path = self.DEST_PATH / f"{self.library_name}.kicad_sym"
+                sym_lib_name = self.sub_library_name or self.library_name
+                lib_file_path = self.DEST_PATH / f"{sym_lib_name}.kicad_sym"
 
                 # Create backup if file exists
                 backup_path = None
@@ -753,10 +770,11 @@ class LibImporter:
 
         if not zipfile.is_zipfile(zip_file):
             logger.error(f"{zip_file} is not a valid zip file")
-            self.print(f"Error: {zip_file} is not a valid zip file")
+            self.print(f"{tr('import.invalid_zip')}: {zip_file}")
             return None
 
-        self.print(f"Import: {zip_file}")
+        self.print(f"{tr('import.importing')}: {zip_file}")
+        self._report_progress(1, 5, "Identifying format...")
 
         temp_dirs = []  # Track temporary directories to clean up later
 
@@ -765,7 +783,8 @@ class LibImporter:
                 # Identify library type and locate files
                 remote_type, files = self.identify_remote_type(zf)
                 logger.info(f"Type: {remote_type.name}")
-                self.print(f"Identified as {remote_type.name}")
+                self.print(f"{tr('import.identified_as')} {remote_type.name}")
+                self._report_progress(2, 5, f"Loading {remote_type.name}...")
 
                 # Handle partial archives
                 if remote_type == REMOTE_TYPES.Partial:
@@ -785,6 +804,8 @@ class LibImporter:
                         files["symbol"], files.get("dcm")
                     )
                     logger.info(f"Loaded symbol: {symbol_name}")
+
+                self._report_progress(3, 5, "Processing footprint...")
 
                 # Handle footprint - extract directly to destination
                 footprint_file_path = None
@@ -835,6 +856,8 @@ class LibImporter:
                             self.print("Warning: Failed to extract footprint")
                             footprint_file_path = None
 
+                self._report_progress(4, 5, "Loading 3D model...")
+
                 # Load 3D model
                 model_temp_dir = None
                 model_path = None
@@ -855,6 +878,8 @@ class LibImporter:
                 if symbol_lib:
                     symbol_lib = self._add_custom_metadata(symbol_lib, remote_type.name)
 
+                self._report_progress(5, 5, "Saving to library...")
+
                 # Save everything to the library
                 if symbol_lib or footprint_file_path or model_path:
                     success = self.save_to_library(
@@ -867,6 +892,9 @@ class LibImporter:
                     )
 
                     if success:
+                        self._notify_import_success(
+                            symbol_name, remote_type.name, str(zip_file)
+                        )
                         # Check if anything was actually changed
                         if (
                             self.lib_skipped
@@ -874,7 +902,7 @@ class LibImporter:
                             and self.model_skipped
                         ):
                             logger.info("Import completed - all files already exist")
-                            self.print("Import completed")
+                            self.print(tr("import.completed"))
                             return ("OK",)
                         elif (
                             self.lib_skipped
@@ -882,31 +910,50 @@ class LibImporter:
                             or self.model_skipped
                         ):
                             logger.info("Import completed with some items skipped")
-                            self.print("Import successful (some items already existed)")
+                            self.print(tr("import.success_partial"))
                             return ("OK",)
                         else:
                             logger.info("Import completed successfully")
-                            self.print("Import successful")
+                            self.print(tr("import.success"))
                             return ("OK",)
                     else:
                         logger.warning("Import failed during save")
-                        self.print("Import failed during save")
+                        self.print(tr("import.save_failed"))
                         return ("Warning",)
                 else:
                     logger.warning("No content to import")
-                    self.print("Warning: No content found to import")
+                    self.print(tr("import.no_content"))
                     return ("Warning",)
 
         except Exception as e:
             logger.error(f"Import failed: {str(e)}")
-            self.print(f"Error during import: {str(e)}")
+            self.print(f"{tr('import.error')}: {str(e)}")
             logging.exception("Import error")
             return None
         finally:
+            self._report_progress(0, 0, "")  # Reset progress
             # Clean up temporary directories
             for temp_dir in temp_dirs:
                 if temp_dir and temp_dir.exists():
                     shutil.rmtree(temp_dir)
+
+    def _report_progress(self, step: int, total: int, message: str) -> None:
+        """Report import progress via callback if set."""
+        if self.on_progress:
+            try:
+                self.on_progress(step, total, message)
+            except Exception:
+                pass
+
+    def _notify_import_success(
+        self, component_name: str, source: str, zip_file: str
+    ) -> None:
+        """Notify successful import via callback if set."""
+        if self.on_import_success:
+            try:
+                self.on_import_success(component_name, source, zip_file)
+            except Exception:
+                pass
 
 
 def main(

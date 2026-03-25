@@ -8,6 +8,11 @@ from typing import Optional, Tuple, NamedTuple, Callable
 from dataclasses import dataclass
 import re
 
+try:
+    from version import PLUGIN_VERSION_STRING
+except ImportError:
+    PLUGIN_VERSION_STRING = "CustomImportGUI"
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -183,7 +188,7 @@ class EasyEDAImporter:
 
         # Metadata fields to add
         metadata = [
-            ('ImportedBy', 'CustomImportGUI v1.2.0'),
+            ('ImportedBy', PLUGIN_VERSION_STRING),
             ('Author', 'Samuel Flores'),
             ('Repository', 'github.com/safloresmo/CustomImportGUI'),
             ('Website', 'www.mictlanteam.com'),
