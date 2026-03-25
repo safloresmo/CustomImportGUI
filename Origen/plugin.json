@@ -1,0 +1,29 @@
+{
+  "$schema": "https://go.kicad.org/api/schemas/v1",
+  "identifier": "com.github.safloresmo.CustomImportGUI",
+  "name": "Custom Import GUI",
+  "description": "Import library files from Octopart, Samacsys, Ultralibrarian, Snapeda and EasyEDA",
+  "runtime": {
+    "type": "python",
+    "version": "3"
+  },
+  "actions": [
+    {
+      "identifier": "impart_action-action",
+      "name": "Custom Import GUI (IPC API)",
+      "description": "impart_action",
+      "show-button": true,
+      "scopes": [
+        "schematic",
+        "pcb"
+      ],
+      "entrypoint": "impart_action.py",
+      "icons-light": [
+        "icon.png"
+      ],
+      "icons-dark": [
+        "icon.png"
+      ]
+    }
+  ]
+}

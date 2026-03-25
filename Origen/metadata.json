@@ -1,0 +1,48 @@
+{
+  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "name": "Custom Import GUI",
+  "description": "Customizable library importer for KiCad",
+  "description_full": "Custom Import GUI allows you to import component libraries from multiple sources (EasyEDA, LCSC, Octopart, Samacsys, Ultralibrarian, Snapeda) into your own customizable library structure. Choose your own library names, environment variables, and organize components your way.",
+  "identifier": "com.github.safloresmo.CustomImportGUI",
+  "type": "plugin",
+  "author": {
+    "name": "Samuel Flores",
+    "contact": {
+      "web": "https://github.com/safloresmo/CustomImportGUI"
+    }
+  },
+  "maintainer": {
+    "name": "Samuel Flores",
+    "contact": {
+      "web": "https://github.com/safloresmo/CustomImportGUI"
+    }
+  },
+  "license": "GPL-3.0",
+  "resources": {
+    "homepage": "https://github.com/safloresmo/CustomImportGUI"
+  },
+  "icon": "resources/icon.png",
+  "tags": [
+    "import",
+    "library",
+    "easyeda",
+    "lcsc",
+    "octopart",
+    "samacsys",
+    "ultralibrarian",
+    "snapeda",
+    "custom",
+    "personalizable"
+  ],
+  "versions": [
+    {
+      "version": "1.0.0",
+      "status": "stable",
+      "kicad_version": "8.0",
+      "kicad_version_max": "9.99"
+    }
+  ],
+  "keep_on_update": [
+    "config.ini"
+  ]
+}
