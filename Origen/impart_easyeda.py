@@ -177,12 +177,69 @@ class EasyEDAImporter:
         match = re.search(r"\(\s*version\s+(\d+)\s*\)", content[:200])
         return int(match.group(1)) if match else 0
 
+    def _add_metadata_to_symbol(self, symbol_content: str) -> str:
+        """Add custom metadata properties to a symbol."""
+        from datetime import datetime
+
+        # Metadata fields to add
+        metadata = [
+            ('ImportedBy', 'CustomImportGUI v1.1.0'),
+            ('Author', 'Samuel Flores'),
+            ('Repository', 'github.com/safloresmo/CustomImportGUI'),
+            ('Website', 'www.mictlanteam.com'),
+            ('ImportDate', datetime.now().strftime("%Y-%m-%d")),
+            ('OriginalSource', 'EasyEDA'),
+        ]
+
+        # Find the last property in the symbol
+        # Properties are typically defined early in the symbol definition
+        # We'll insert our metadata before the first non-property element
+
+        properties_text = ""
+        for key, value in metadata:
+            properties_text += f"""
+        (property "{key}" "{value}"
+            (at 0 0 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )"""
+
+        # Find where to insert - after existing properties
+        # Look for the last (property ...) block
+        import re
+        last_prop_match = None
+        for match in re.finditer(r'\(property[^)]*\([^)]*\([^)]*\)\s*\)\s*\)', symbol_content, re.DOTALL):
+            last_prop_match = match
+
+        if last_prop_match:
+            # Insert after the last property
+            insert_pos = last_prop_match.end()
+            modified_content = symbol_content[:insert_pos] + properties_text + symbol_content[insert_pos:]
+            return modified_content
+        else:
+            # If no properties found, insert after the symbol name
+            symbol_match = re.search(r'\(symbol\s+"[^"]*"', symbol_content)
+            if symbol_match:
+                insert_pos = symbol_match.end()
+                modified_content = symbol_content[:insert_pos] + properties_text + symbol_content[insert_pos:]
+                return modified_content
+
+        # Fallback: return original if we can't find insertion point
+        return symbol_content
+
     def add_symbol_to_upgraded_lib(self, symbol_content: str) -> bool:
         """Add symbol to library with automatic upgrade handling."""
         try:
             if not symbol_content:
                 self._print("Error: Empty symbol content provided")
                 return False
+
+            # Add custom metadata to symbol
+            symbol_content = self._add_metadata_to_symbol(symbol_content)
 
             complete_symbol_lib = f"""(kicad_symbol_lib
     (version 20211014)

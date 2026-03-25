@@ -1,5 +1,80 @@
 # Changelog - Custom Import GUI
 
+## Version 1.1.0 - Metadatos Personalizados y Correcciones
+
+### Nuevas Características
+
+#### 📝 Sistema de Metadatos Automáticos
+- ✅ Todos los componentes importados incluyen metadatos personalizados
+- ✅ Campos añadidos a cada símbolo:
+  - `ImportedBy`: CustomImportGUI v1.1.0
+  - `Author`: Samuel Flores
+  - `Repository`: github.com/safloresmo/CustomImportGUI
+  - `Website`: www.mictlanteam.com
+  - `ImportDate`: Fecha de importación
+  - `OriginalSource`: Fuente original (EasyEDA, Snapeda, etc.)
+- ✅ Metadatos ocultos en esquemático pero visibles en propiedades
+- ✅ Trazabilidad completa de componentes importados
+
+#### 🔧 Correcciones de Bugs
+- ✅ **Bug crítico EasyEDA:** Las importaciones desde EasyEDA/LCSC ahora respetan el perfil seleccionado
+  - Antes: Creaba librería separada "EasyEDA.kicad_sym"
+  - Ahora: Usa el nombre del perfil activo (ej: "MictlanTeam.kicad_sym")
+- ✅ Corregida variable de entorno en importaciones EasyEDA
+  - Antes: Usaba hardcoded `${KICAD_3RD_PARTY}`
+  - Ahora: Usa la variable del perfil configurado
+
+#### 🎨 Mejoras de Interfaz
+- ✅ Descripción del plugin mejorada en Plugin Manager
+- ✅ Información más clara sobre funcionalidades
+
+### Archivos Modificados
+
+1. **`impart_action.py` (líneas 1031-1036)**
+   - Corregido ImportConfig para EasyEDA para usar configuración del perfil
+
+2. **`KiCadImport/__init__.py`**
+   - Añadida función `_add_custom_metadata()` (líneas 504-558)
+   - Integración de metadatos antes de guardar símbolos (línea 856)
+
+3. **`impart_easyeda.py`**
+   - Añadida función `_add_metadata_to_symbol()` (líneas 180-232)
+   - Integración de metadatos en importaciones EasyEDA (línea 242)
+
+4. **`plugin.json`**
+   - Actualizada descripción para mejor visualización en PCM
+
+5. **`metadata.json`**
+   - Actualizada versión a 1.1.0
+
+### Documentación
+
+- ✅ README.md actualizado con:
+  - Nueva sección de Metadatos de Componentes
+  - Características actualizadas
+  - Sistema de perfiles documentado
+
+### Beneficios de Esta Versión
+
+1. **Trazabilidad Completa:**
+   - Identifica origen de cada componente
+   - Fecha de importación registrada
+   - Información de contacto disponible
+
+2. **Consistencia:**
+   - Todas las importaciones usan el mismo perfil
+   - No más librerías separadas inesperadas
+
+3. **Profesionalismo:**
+   - Componentes con metadatos organizados
+   - Información de autoría clara
+
+### Migración desde v1.0.0
+
+No se requiere migración. Los componentes importados con v1.0.0 seguirán funcionando normalmente. Los nuevos componentes incluirán automáticamente los metadatos.
+
+---
+
 ## Version 1.0.0 - Transformación a Custom Import GUI
 
 ### Cambios Principales
